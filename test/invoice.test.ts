@@ -33,6 +33,21 @@ test("buildInvoice issues a EUR invoice with the VAT breakdown", () => {
   });
 });
 
+test("an event published before currencies existed still gets an EUR invoice", () => {
+  const invoice = buildInvoice({ ...event, currency: undefined, eurExchangeRate: undefined }, 1);
+  assert.equal(invoice.currency, "EUR");
+  assert.equal(invoice.vatCents, 2100);
+});
+
+test("a GBP order gets a GBP invoice with net and VAT in GBP", () => {
+  const invoice = buildInvoice({ ...event, currency: "GBP", eurExchangeRate: 1.17 }, 1);
+  assert.equal(invoice.currency, "GBP");
+  assert.deepEqual(
+    { total: invoice.totalCents, net: invoice.netCents, vat: invoice.vatCents },
+    { total: 12100, net: 10000, vat: 2100 },
+  );
+});
+
 test("the ledger numbers invoices consecutively", () => {
   const ledger = new Ledger();
   ledger.issue(event);
