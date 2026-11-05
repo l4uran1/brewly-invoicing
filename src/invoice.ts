@@ -1,8 +1,15 @@
+export type Currency = "EUR" | "GBP";
+
 /** Payload of `orders.created`, as published by orders-api (see docs/system-map.md). */
 export type OrderCreated = {
   orderId: string;
   customerEmail: string;
+  /** Minor units of `currency`, VAT included. */
   totalCents: number;
+  /** Missing in events published before add-order-currency: treat as EUR. */
+  currency?: Currency;
+  /** EUR per one unit of `currency`, fixed at checkout. Missing in old events: 1. */
+  eurExchangeRate?: number;
   createdAt: string;
 };
 
@@ -11,7 +18,7 @@ export type Invoice = {
   orderId: string;
   customerEmail: string;
   issuedAt: string;
-  currency: "EUR";
+  currency: Currency;
   /** Prices include VAT: total = net + vat. */
   totalCents: number;
   netCents: number;
@@ -39,7 +46,7 @@ export function buildInvoice(event: OrderCreated, sequence: number): Invoice {
     orderId: event.orderId,
     customerEmail: event.customerEmail,
     issuedAt: event.createdAt,
-    currency: "EUR",
+    currency: event.currency ?? "EUR",
     totalCents: event.totalCents,
     ...splitVat(event.totalCents),
     vatRate: VAT_RATE,
