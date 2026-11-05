@@ -48,6 +48,18 @@ test("a GBP order gets a GBP invoice with net and VAT in GBP", () => {
   );
 });
 
+test("a non-EUR invoice also states the VAT in EUR with the order's exchange rate", () => {
+  const invoice = buildInvoice({ ...event, currency: "GBP", eurExchangeRate: 1.17 }, 1);
+  assert.equal(invoice.vatEurCents, 2457);
+  assert.equal(invoice.eurExchangeRate, 1.17);
+});
+
+test("an EUR invoice has no separate VAT in EUR", () => {
+  const invoice = buildInvoice({ ...event, currency: "EUR", eurExchangeRate: 1 }, 1);
+  assert.equal("vatEurCents" in invoice, false);
+  assert.equal("eurExchangeRate" in invoice, false);
+});
+
 test("the ledger numbers invoices consecutively", () => {
   const ledger = new Ledger();
   ledger.issue(event);
