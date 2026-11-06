@@ -14,7 +14,11 @@ function print(invoice: Invoice): void {
       `\n🧾 ${invoice.number}  (order ${invoice.orderId.slice(0, 8)}, ${invoice.customerEmail})`,
       `   Net:    ${money(invoice.netCents)} ${invoice.currency}`,
       `   VAT ${invoice.vatRate}%: ${money(invoice.vatCents)} ${invoice.currency}`,
-      `   Total:  ${money(invoice.totalCents)} ${invoice.currency}\n`,
+      `   Total:  ${money(invoice.totalCents)} ${invoice.currency}`,
+      ...(invoice.vatEurCents === undefined
+        ? []
+        : [`   VAT in EUR: ${money(invoice.vatEurCents)} EUR (1 ${invoice.currency} = ${invoice.eurExchangeRate} EUR)`]),
+      "",
     ].join("\n"),
   );
 }
